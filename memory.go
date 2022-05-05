@@ -43,9 +43,9 @@ func (m *Memory) saveToMemory(blocksIndexNumber []int64, infoBlocks [][block_siz
 	}
 	m.indexParts[blocksIndexNumber[len(blocksIndexNumber)-1]] = endFile
 
-	for i, block := range infoBlocks {
+	for i, _ := range infoBlocks {
 		index := blocksIndexNumber[i]
-		m.memoryParts[index] = &block
+		m.memoryParts[index] = &infoBlocks[i]
 	}
 
 	return nil
@@ -121,9 +121,7 @@ func (m *Memory) SaveFile(fileName string, fileBody []byte) (FileInfo, error) {
 
 	name := filepath.Base(fileName)
 	format := filepath.Ext(fileName)
-	/*out := s.mem.loadFromMemory(blocksIndex)
 
-	fmt.Println(string(out[0][:block_size-bytesRemove]), "s")*/
 	return FileInfo{
 		fileStart:   int(blocksIndex[0]),
 		fileName:    name,
