@@ -6,44 +6,40 @@ import (
 )
 
 type Memory struct {
-	indexParts  [side][side]int64
-	memoryParts [side][side]*[]byte
+	indexParts  [size]int64
+	memoryParts [size]*[block_size]byte
 }
 
-const side = 100
+const size = 100
 const block_size = 1024 * 1024 // 1MB
 const freeBlockFlag = -1
 
-/*func (m *Memory) SaveBlock(block [block_size]byte) (numberOfBlock int64, err error) {
-
-}*/
-
 func (m *Memory) findFreeSpace(needBlocks int) (blocksNumber []int64, err error) {
-	for y := 0; y < side; y++ {
-		for x := 0; x < side; x++ {
-			if needBlocks == 0 {
-				return blocksNumber, nil
-			}
+	for x := 0; x < size; x++ {
+		if needBlocks == 0 {
+			return blocksNumber, nil
+		}
 
-			if m.indexParts[y][x] == freeBlockFlag {
-				blockNumber := int64((y + 1) * (x + 1))
-				blocksNumber = append(blocksNumber, blockNumber)
-				needBlocks--
-			}
+		if m.indexParts[x] == freeBlockFlag {
+			blocksNumber = append(blocksNumber, int64(x))
+			needBlocks--
 		}
 	}
 
 	return nil, errors.New("not enough free space")
 }
 
-func (m *Memory) saveToMemory(blocksNumber []int64, infoBlocks [][]byte) error {
-	if len(blocksNumber) != len(infoBlocks) {
+func (m *Memory) saveToMemory(blocksIndexNumber []int64, infoBlocks [][block_size]byte) error {
+	if len(blocksIndexNumber) != len(infoBlocks) {
 		err := errors.New("wrong input data")
 		log.Println(err)
 		return err
 	}
 
-	for i, i2 := range blocksNumber {
-
+	for i, block := range infoBlocks {
+		index := blocksIndexNumber[i]
+		m.memoryParts[index] = &block
 	}
+
+	return nil
 }
