@@ -60,6 +60,20 @@ func (m *Memory) loadFromMemory(blocksIndexNumber []int64) [][block_size]byte {
 	return output
 }
 
+func (m *Memory) findBlocksIndexNumber(start int64) (blocksIndexNumber []int64) {
+	currIndex := start
+
+	for {
+		blocksIndexNumber = append(blocksIndexNumber, currIndex)
+		index := m.indexParts[currIndex]
+		if index == endFile {
+			return blocksIndexNumber
+		}
+
+		currIndex = index
+	}
+}
+
 func (m *Memory) SaveFile(fileName string, fileBody []byte) (FileInfo, error) {
 	var amountOfBlocks int
 	var bytesRemove int
@@ -116,4 +130,23 @@ func (m *Memory) SaveFile(fileName string, fileBody []byte) (FileInfo, error) {
 		fileFormat:  format,
 		BytesRemove: bytesRemove,
 	}, nil
+}
+
+func (m *Memory) LoadFile(info FileInfo) ([]byte, error) {
+	if info.fileStart > len(m.indexParts) || int64(info.fileStart) <= 0 {
+		return []byte{}, errors.New("wrong file")
+	}
+
+	blocksIndex := m.findBlocksIndexNumber(int64(info.fileStart))
+	blocks := m.loadFromMemory(blocksIndex)
+
+	fileLen := block_size*len(blocksIndex) - info.BytesRemove
+	file := make([]byte, 0, fileLen)
+
+	for i := 0; i < len(blocks)-1; i++ {
+		file = append(file, blocks[i][:block_size]...)
+	}
+
+	file = append(file, blocks[len(blocks)-1][:block_size-info.BytesRemove]...)
+	return file, nil
 }
