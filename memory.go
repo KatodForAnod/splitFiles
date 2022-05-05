@@ -6,16 +6,16 @@ import (
 )
 
 type Memory struct {
-	indexParts  [size]int64
-	memoryParts [size]*[block_size]byte
+	indexParts  [memoryBlocksCount]int64
+	memoryParts [memoryBlocksCount]*[block_size]byte
 }
 
-const size = 100
+const memoryBlocksCount = 100
 const block_size = 1024 * 1024 // 1MB
 const freeBlockFlag = -1
 
 func (m *Memory) findFreeSpace(needBlocks int) (blocksNumber []int64, err error) {
-	for x := 0; x < size; x++ {
+	for x := 0; x < memoryBlocksCount; x++ {
 		if needBlocks == 0 {
 			return blocksNumber, nil
 		}
