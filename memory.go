@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"log"
+	"path/filepath"
 )
 
 type Memory struct {
@@ -57,4 +58,62 @@ func (m *Memory) loadFromMemory(blocksIndexNumber []int64) [][block_size]byte {
 	}
 
 	return output
+}
+
+func (m *Memory) SaveFile(fileName string, fileBody []byte) (FileInfo, error) {
+	var amountOfBlocks int
+	var bytesRemove int
+	var extraBlock int
+
+	isEven := (len(fileBody) % block_size) == 0
+	if !isEven {
+		extraBlock = 1
+		bytesRemove = block_size - len(fileBody)%block_size
+	}
+
+	amountOfBlocks += len(fileBody) / block_size
+	splitFileBody := make([][block_size]byte, amountOfBlocks+extraBlock)
+
+	for i := 0; i < amountOfBlocks; i++ {
+		buff := [block_size]byte{}
+		for j := 0; j < block_size; j++ {
+			buff[j] = fileBody[(block_size*i)+j]
+		}
+
+		splitFileBody[i] = buff
+	}
+
+	buff := [block_size]byte{}
+	startIndex := block_size * amountOfBlocks
+	for j := startIndex; j < len(fileBody); j++ {
+		buff[j-startIndex] = fileBody[j]
+	}
+
+	if !isEven {
+		splitFileBody[len(splitFileBody)-1] = buff
+	}
+
+	blocksIndex, err := m.findFreeSpace(amountOfBlocks + extraBlock)
+	if err != nil {
+		log.Println(err)
+		return FileInfo{}, err
+	}
+
+	err = m.saveToMemory(blocksIndex, splitFileBody)
+	if err != nil {
+		log.Println(err)
+		return FileInfo{}, err
+	}
+
+	name := filepath.Base(fileName)
+	format := filepath.Ext(fileName)
+	/*out := s.mem.loadFromMemory(blocksIndex)
+
+	fmt.Println(string(out[0][:block_size-bytesRemove]), "s")*/
+	return FileInfo{
+		fileStart:   int(blocksIndex[0]),
+		fileName:    name,
+		fileFormat:  format,
+		BytesRemove: bytesRemove,
+	}, nil
 }
