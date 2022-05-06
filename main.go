@@ -1,10 +1,28 @@
 package main
 
-import "fmt"
+import (
+	"io/ioutil"
+	"os"
+	"splitFiles/controller"
+	memory "splitFiles/memory"
+)
 
 func main() {
-	q := [][]int{{1, 2, 3}, {3, 4, 5}}
+	bytes1, err := ioutil.ReadFile("1.docx")
+	if err != nil {
+		return
+	}
 
-	fmt.Println(len(q))
+	mem := memory.Memory{}
+	c := controller.Controller{}
+	c.SetMemory(&mem)
 
+	info, _ := c.SaveFile("s", bytes1)
+	out, _ := c.LoadFile(info)
+
+	file, err := os.Create("12.docx")
+	if err != nil {
+		return
+	}
+	file.Write(out)
 }
