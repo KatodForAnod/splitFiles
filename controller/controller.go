@@ -11,8 +11,9 @@ type Controller struct {
 	mem      memory.Mem
 }
 
-func (c *Controller) SetMemory(mem memory.Mem) {
+func (c *Controller) InitController(mem memory.Mem) {
 	c.mem = mem
+	c.allFiles = make(map[string]memory.FileInfo)
 }
 
 func (s *Controller) SaveFile(fileName string, fileBody []byte) (memory.FileInfo, error) {
