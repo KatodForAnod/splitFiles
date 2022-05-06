@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"errors"
 	"log"
 	"splitFiles/memory"
 )
@@ -25,6 +26,11 @@ func (s *Controller) SaveFile(fileName string, fileBody []byte) (memory.FileInfo
 	return fileInfo, nil
 }
 
-func (c *Controller) LoadFile(info memory.FileInfo) ([]byte, error) {
+func (c *Controller) LoadFile(fileName string) ([]byte, error) {
+	info, isExist := c.allFiles[fileName]
+	if !isExist {
+		return []byte{}, errors.New("not found")
+	}
+
 	return c.mem.LoadFile(info)
 }
