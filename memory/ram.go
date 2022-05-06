@@ -1,4 +1,4 @@
-package main
+package memory
 
 import (
 	"errors"
@@ -9,6 +9,13 @@ import (
 type Memory struct {
 	indexParts  [memoryBlocksCount]int64
 	memoryParts [memoryBlocksCount]*[block_size]byte
+}
+
+type FileInfo struct {
+	fileStart   int
+	fileName    string
+	fileFormat  string
+	BytesRemove int
 }
 
 const memoryBlocksCount = 100
