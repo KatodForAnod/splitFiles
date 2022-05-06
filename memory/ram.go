@@ -4,11 +4,14 @@ import (
 	"errors"
 	"log"
 	"path/filepath"
+	"sync"
 )
 
 type Memory struct {
 	indexParts  [memoryBlocksCount]int64
 	memoryParts [memoryBlocksCount]*[block_size]byte
+
+	mt sync.Mutex
 }
 
 type FileInfo struct {
@@ -22,8 +25,12 @@ const memoryBlocksCount = 100
 const block_size = 1024 * 1024 // 1MB
 const endFile = -1
 const emptyBlock = 0
+const reservedBlock = -2
 
 func (m *Memory) findFreeSpace(needBlocks int) (blocksNumber []int64, err error) {
+	m.mt.Lock()
+	defer m.mt.Unlock()
+
 	for x := 1; x < memoryBlocksCount; x++ {
 		if needBlocks == 0 {
 			return blocksNumber, nil
@@ -32,6 +39,7 @@ func (m *Memory) findFreeSpace(needBlocks int) (blocksNumber []int64, err error)
 		if m.indexParts[x] == emptyBlock {
 			blocksNumber = append(blocksNumber, int64(x))
 			needBlocks--
+			m.indexParts[x] = reservedBlock
 		}
 	}
 
