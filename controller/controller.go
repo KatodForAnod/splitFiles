@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"log"
 	"splitFiles/memory"
 )
 
@@ -14,7 +15,14 @@ func (c *Controller) SetMemory(mem memory.Mem) {
 }
 
 func (s *Controller) SaveFile(fileName string, fileBody []byte) (memory.FileInfo, error) {
-	return s.mem.SaveFile(fileName, fileBody)
+	fileInfo, err := s.mem.SaveFile(fileName, fileBody)
+	if err != nil {
+		log.Println(err)
+		return memory.FileInfo{}, err
+	}
+	s.allFiles[fileName] = fileInfo
+
+	return fileInfo, nil
 }
 
 func (c *Controller) LoadFile(info memory.FileInfo) ([]byte, error) {
